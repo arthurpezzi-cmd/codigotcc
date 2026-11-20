@@ -1,104 +1,251 @@
 /**
  * ============================================================================
- * BANCO DE DADOS DOS CARTAZES (6 ALVOS — FORMATO A3 VERTICAL)
+ * DADOS DOS 9 CARTAZES • 3 GRUPOS • RECORTE (.WEBP), MOCKUP E PLANEJAMENTO
  * ============================================================================
- * Para adicionar ou editar uma personalidade, basta alterar a lista no final
- * deste arquivo. Os campos de `destaquePopOut` são opcionais: o que não for
- * informado usa os valores de POP_OUT_PADRAO.
- *
- * DICA PARA O ELEMENTO SALTANTE (EFEITO 2.5D):
- * 1. No Illustrator/Photoshop, deixe visível só a camada da personalidade
- *    (fundo transparente).
- * 2. Exporte em PNG usando "Usar Pranchetas" na mesma proporção A3 do cartaz.
- * 3. Com `usarPranchetaA3Completa: true`, o recorte encaixa exatamente sobre
- *    o cartaz impresso, sem precisar calcular coordenadas.
- *    Se o PNG ainda não existir, o sistema desenha uma moldura de luz.
- *
- * CAMPOS:
- *  - targetIndex   : posição do cartaz dentro do arquivo targets.mind
- *  - corDestaque   : cor da faixa e da etiqueta de ano na placa de museu
- *  - profundidadeZ : quanto a personagem "salta" do papel (metros virtuais)
- *  - escalaExtra   : leve aumento de escala para destacar do fundo impresso
- *  - posX / posY   : ajuste fino (posY só vale sem `usarPranchetaA3Completa`)
- * ============================================================================
+ * Onde colocar o cartaz planejado:
+ * Salve a imagem digital do planejamento em:
+ *   ./assets/planejamento/planejamento-01.png ... planejamento-09.png
+ * e referencie o caminho em `arquivoPlanejamento`.
  */
 
-(function () {
-  "use strict";
+window.CONFIG_EXPOSICAO = {
+  tituloExposicao: "NÃO NASCEMOS PARA CABER",
+  urlZipCartazes: "./assets/downloads/cartazes-nao-nascemos-para-caber.zip",
+  nomeArquivoZip: "cartazes-nao-nascemos-para-caber.zip",
+};
 
-  const POP_OUT_PADRAO = {
-    ativo: true,
-    usarPranchetaA3Completa: true,
-    profundidadeZ: 0.08,
-    escalaExtra: 1.04,
-    posX: 0.0,
-    posY: 0.08,
-  };
+window.GRUPOS_PALETA = {
+  grupo1: {
+    nomeGrupo: "Grupo 1 - Denúncia e Vigilância",
+    dot: "#ec1c7a",
+    cardBg: "#ec1c7a",
+    titleColor: "#f5c400",
+    datesColor: "#f5c400",
+    textColor: "#ffffff",
+    tabSelectedText: "#ec1c7a",
+  },
+  grupo2: {
+    nomeGrupo: "Grupo 2 - Resiliência e Fratura",
+    dot: "#a91b26",
+    cardBg: "#c58b2a",
+    titleColor: "#a91b26",
+    datesColor: "#a91b26",
+    textColor: "#f4f1ea",
+    tabSelectedText: "#c58b2a",
+  },
+  grupo3: {
+    nomeGrupo: "Grupo 3 - Plenitude e Orgulho",
+    dot: "#5b2280",
+    cardBg: "#f5c400",
+    titleColor: "#5b2280",
+    datesColor: "#5b2280",
+    textColor: "#111111",
+    tabSelectedText: "#5b2280",
+  },
+};
 
-  const nomeArquivo = (indice) =>
-    `cartaz-${String(indice + 1).padStart(2, "0")}`;
+window.PERSONALIDADES_DB = [
+  // ==================== GRUPO 1 - DENÚNCIA E VIGILÂNCIA ====================
+  {
+    targetIndex: 0,
+    id: "cartaz-01",
+    grupo: "grupo1",
+    nomeCompleto: "ALAN TURING",
+    datas: "1912 - 1954",
+    resumoFeitos:
+      "Pai da computação moderna que salvou milhões na guerra, mas foi condenado pelo Estado à castração química por ser homossexual, simbolizando a violência letal da moral hegemônica.",
+    comoFoiPlanejado:
+      "Pai da computação moderna que salvou milhões na guerra, mas foi condenado pelo Estado à castração química por ser homossexual, simbolizando a violência letal da moral hegemônica.",
+    imagemMockup: "./assets/mockups/mockup-01.jpg",
+    arquivoPlanejamento: "./assets/planejamento/planejamento-01.png",
+    destaquePopOut: {
+      ativo: true,
+      arquivoWebP: "./assets/recortes/cartaz-01.webp",
+      usarPranchetaA3Completa: true,
+      profundidadeZ: 0.08,
+      escalaExtra: 1.04,
+      posX: 0.0,
+      posY: 0.08,
+    },
+  },
+  {
+    targetIndex: 1,
+    id: "cartaz-02",
+    grupo: "grupo1",
+    nomeCompleto: "WALDIRENE NOGUEIRA",
+    datas: "1948 - 2026",
+    resumoFeitos:
+      "Pioneira da dignidade trans no Brasil, desafiou a censura e a repressão da ditadura nos anos 1970 ao protagonizar precedentes históricos de autodeterminação corporal.",
+    comoFoiPlanejado:
+      "Pioneira da dignidade trans no Brasil, desafiou a censura e a repressão da ditadura nos anos 1970 ao protagonizar precedentes históricos de autodeterminação corporal.",
+    imagemMockup: "./assets/mockups/mockup-02.jpg",
+    arquivoPlanejamento: "./assets/planejamento/planejamento-02.png",
+    destaquePopOut: {
+      ativo: true,
+      arquivoWebP: "./assets/recortes/cartaz-02.webp",
+      usarPranchetaA3Completa: true,
+      profundidadeZ: 0.08,
+      escalaExtra: 1.04,
+      posX: 0.0,
+      posY: 0.08,
+    },
+  },
+  {
+    targetIndex: 2,
+    id: "cartaz-03",
+    grupo: "grupo1",
+    nomeCompleto: "MARSHA P. JOHNSON",
+    datas: "1945 - 1992",
+    resumoFeitos:
+      "Mulher trans negra e líder de Stonewall (1969), fundou o grupo STAR e dedicou a vida a acolher jovens marginalizados e combater a violência policial.",
+    comoFoiPlanejado:
+      "Mulher trans negra e líder de Stonewall (1969), fundou o grupo STAR e dedicou a vida a acolher jovens marginalizados e combater a violência policial.",
+    imagemMockup: "./assets/mockups/mockup-03.jpg",
+    arquivoPlanejamento: "./assets/planejamento/planejamento-03.png",
+    destaquePopOut: {
+      ativo: true,
+      arquivoWebP: "./assets/recortes/cartaz-03.webp",
+      usarPranchetaA3Completa: true,
+      profundidadeZ: 0.08,
+      escalaExtra: 1.04,
+      posX: 0.0,
+      posY: 0.08,
+    },
+  },
 
-  function criarPersonalidade(targetIndex, dados) {
-    const id = nomeArquivo(targetIndex);
-    return {
-      targetIndex,
-      id,
-      ...dados,
-      destaquePopOut: {
-        ...POP_OUT_PADRAO,
-        arquivoPNG: `./assets/recortes/${id}.png`,
-        ...(dados.destaquePopOut || {}),
-      },
-    };
-  }
+  // ==================== GRUPO 2 - RESILIÊNCIA E FRATURA ====================
+  {
+    targetIndex: 3,
+    id: "cartaz-04",
+    grupo: "grupo2",
+    nomeCompleto: "ERIKA HILTON",
+    datas: "1992",
+    resumoFeitos:
+      "Primeira mulher trans negra eleita deputada federal, transformou a vivência das ruas em liderança política no centro do poder institucional contra a transfobia.",
+    comoFoiPlanejado:
+      "Primeira mulher trans negra eleita deputada federal, transformou a vivência das ruas em liderança política no centro do poder institucional contra a transfobia.",
+    imagemMockup: "./assets/mockups/mockup-04.jpg",
+    arquivoPlanejamento: "./assets/planejamento/planejamento-04.png",
+    destaquePopOut: {
+      ativo: true,
+      arquivoWebP: "./assets/recortes/cartaz-04.webp",
+      usarPranchetaA3Completa: true,
+      profundidadeZ: 0.08,
+      escalaExtra: 1.04,
+      posX: 0.0,
+      posY: 0.08,
+    },
+  },
+  {
+    targetIndex: 4,
+    id: "cartaz-05",
+    grupo: "grupo2",
+    nomeCompleto: "GUILHERME CORTEZ",
+    datas: "1997",
+    resumoFeitos:
+      "Deputado estadual abertamente bissexual, destaca-se pelo enfrentamento direto à extrema-direita na defesa intransigente da juventude e dos direitos LGBTQIAPN+.",
+    comoFoiPlanejado:
+      "Deputado estadual abertamente bissexual, destaca-se pelo enfrentamento direto à extrema-direita na defesa intransigente da juventude e dos direitos LGBTQIAPN+.",
+    imagemMockup: "./assets/mockups/mockup-05.jpg",
+    arquivoPlanejamento: "./assets/planejamento/planejamento-05.png",
+    destaquePopOut: {
+      ativo: true,
+      arquivoWebP: "./assets/recortes/cartaz-05.webp",
+      usarPranchetaA3Completa: true,
+      profundidadeZ: 0.08,
+      escalaExtra: 1.04,
+      posX: 0.0,
+      posY: 0.08,
+    },
+  },
+  {
+    targetIndex: 5,
+    id: "cartaz-06",
+    grupo: "grupo2",
+    nomeCompleto: "NATASHA FERREIRA",
+    datas: "1991",
+    resumoFeitos:
+      "Vereadora e ativista trans de referência no Sul do país, atua na linha de frente por políticas públicas de empregabilidade, saúde e segurança para a comunidade.",
+    comoFoiPlanejado:
+      "Vereadora e ativista trans de referência no Sul do país, atua na linha de frente por políticas públicas de empregabilidade, saúde e segurança para a comunidade.",
+    imagemMockup: "./assets/mockups/mockup-06.jpg",
+    arquivoPlanejamento: "./assets/planejamento/planejamento-06.png",
+    destaquePopOut: {
+      ativo: true,
+      arquivoWebP: "./assets/recortes/cartaz-06.webp",
+      usarPranchetaA3Completa: true,
+      profundidadeZ: 0.08,
+      escalaExtra: 1.04,
+      posX: 0.0,
+      posY: 0.08,
+    },
+  },
 
-  window.PERSONALIDADES_DB = [
-    criarPersonalidade(0, {
-      nomeCompleto: "Marsha P. Johnson",
-      anoNascimento: "Nasc. 1945",
-      resumoFeitos:
-        "Breve texto de impacto sobre o que essa pessoa fez, sua atuação histórica e sua importância para a conquista de direitos.",
-      corDestaque: "#d9b800", // amarelo do cartaz 01
-    }),
-
-    criarPersonalidade(1, {
-      nomeCompleto: "Personalidade 02 (Nome Completo)",
-      anoNascimento: "Nasc. 1944",
-      resumoFeitos:
-        "Breve texto sobre a trajetória, pioneirismo cultural e contribuição social desta personalidade ao longo das décadas.",
-      corDestaque: "#b8c71a", // verde-limão do cartaz "Abuso de poder"
-    }),
-
-    criarPersonalidade(2, {
-      nomeCompleto: "Personalidade 03 (Nome Completo)",
-      anoNascimento: "Nasc. 1962",
-      resumoFeitos:
-        "Resumo conciso destacando suas principais obras, mobilizações e o legado construído na defesa da cidadania.",
-      corDestaque: "#c4511d", // ferrugem do terceiro cartaz
-    }),
-
-    criarPersonalidade(3, {
-      nomeCompleto: "Personalidade 04 (Nome Completo)",
-      anoNascimento: "Nasc. 1971",
-      resumoFeitos:
-        "Descrição direta sobre como sua presença e voz abriram novos espaços de visibilidade na cultura e na política.",
-      corDestaque: "#ee8a14", // laranja do cartaz "Milionários"
-    }),
-
-    criarPersonalidade(4, {
-      nomeCompleto: "Personalidade 05 (Nome Completo)",
-      anoNascimento: "Nasc. 1980",
-      resumoFeitos:
-        "Síntese das conquistas históricas e do impacto coletivo gerado pelas iniciativas lideradas por esta personalidade.",
-      corDestaque: "#1f7f73", // verde-azulado do cartaz "Abuso de poder"
-    }),
-
-    criarPersonalidade(5, {
-      nomeCompleto: "Personalidade 06 (Nome Completo)",
-      anoNascimento: "Nasc. 1988",
-      resumoFeitos:
-        "Pequeno texto biográfico ressaltando sua atuação contemporânea e transformação do cenário sociocultural.",
-      corDestaque: "#d10f1f", // vermelho do cartaz 01
-    }),
-  ];
-})();
+  // ==================== GRUPO 3 - PLENITUDE E ORGULHO ====================
+  {
+    targetIndex: 6,
+    id: "cartaz-07",
+    grupo: "grupo3",
+    nomeCompleto: "PABLLO VITTAR",
+    datas: "1994",
+    resumoFeitos:
+      "Maior drag queen do pop global, projetou a cultura periférica para o topo do mundo, afirmando o corpo dissidente como celebração e soberania.",
+    comoFoiPlanejado:
+      "Maior drag queen do pop global, projetou a cultura periférica para o topo do mundo, afirmando o corpo dissidente como celebração e soberania.",
+    imagemMockup: "./assets/mockups/mockup-07.jpg",
+    arquivoPlanejamento: "./assets/planejamento/planejamento-07.png",
+    destaquePopOut: {
+      ativo: true,
+      arquivoWebP: "./assets/recortes/cartaz-07.webp",
+      usarPranchetaA3Completa: true,
+      profundidadeZ: 0.08,
+      escalaExtra: 1.04,
+      posX: 0.0,
+      posY: 0.08,
+    },
+  },
+  {
+    targetIndex: 7,
+    id: "cartaz-08",
+    grupo: "grupo3",
+    nomeCompleto: "NEY MATOGROSSO",
+    datas: "1941",
+    resumoFeitos:
+      "Desafiou a moralidade e a censura da ditadura militar com androginia e liberdade corporal plena, encarnando a recusa radical a ser enquadrado.",
+    comoFoiPlanejado:
+      "Desafiou a moralidade e a censura da ditadura militar com androginia e liberdade corporal plena, encarnando a recusa radical a ser enquadrado.",
+    imagemMockup: "./assets/mockups/mockup-08.jpg",
+    arquivoPlanejamento: "./assets/planejamento/planejamento-08.png",
+    destaquePopOut: {
+      ativo: true,
+      arquivoWebP: "./assets/recortes/cartaz-08.webp",
+      usarPranchetaA3Completa: true,
+      profundidadeZ: 0.08,
+      escalaExtra: 1.04,
+      posX: 0.0,
+      posY: 0.08,
+    },
+  },
+  {
+    targetIndex: 8,
+    id: "cartaz-09",
+    grupo: "grupo3",
+    nomeCompleto: "DIVINE",
+    datas: "1945 - 1988",
+    resumoFeitos:
+      "Ícone drag e estrela da contracultura, transformou o excesso e a estética camp em arma política contra a hipocrisia dos padrões burgueses.",
+    comoFoiPlanejado:
+      "Ícone drag e estrela da contracultura, transformou o excesso e a estética camp em arma política contra a hipocrisia dos padrões burgueses.",
+    imagemMockup: "./assets/mockups/mockup-09.jpg",
+    arquivoPlanejamento: "./assets/planejamento/planejamento-09.png",
+    destaquePopOut: {
+      ativo: true,
+      arquivoWebP: "./assets/recortes/cartaz-09.webp",
+      usarPranchetaA3Completa: true,
+      profundidadeZ: 0.08,
+      escalaExtra: 1.04,
+      posX: 0.0,
+      posY: 0.08,
+    },
+  },
+];
