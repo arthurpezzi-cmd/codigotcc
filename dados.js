@@ -10,8 +10,8 @@
 
 window.CONFIG_EXPOSICAO = {
   tituloExposicao: "NÃO NASCEMOS PARA CABER",
-  urlZipCartazes: "./assets/downloads/cartazes-nao-nascemos-para-caber.zip",
-  nomeArquivoZip: "cartazes-nao-nascemos-para-caber.zip",
+  urlPdfCartazes: "./assets/downloads/para%20imprimir%20em%20casa.pdf",
+  nomeArquivoPdf: "para imprimir em casa.pdf",
 };
 
 window.GRUPOS_PALETA = {

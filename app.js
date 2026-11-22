@@ -11,13 +11,13 @@ const PAGE_TYPE = document.body.dataset.page || "home";
 // Configura link de download do .zip na Home
 const btnDownloadZip = document.getElementById("btn-download-zip");
 if (window.CONFIG_EXPOSICAO && btnDownloadZip) {
-  if (window.CONFIG_EXPOSICAO.urlZipCartazes) {
-    btnDownloadZip.setAttribute("href", window.CONFIG_EXPOSICAO.urlZipCartazes);
+  if (window.CONFIG_EXPOSICAO.urlPdfCartazes) {
+    btnDownloadZip.setAttribute("href", window.CONFIG_EXPOSICAO.urlPdfCartazes);
   }
-  if (window.CONFIG_EXPOSICAO.nomeArquivoZip) {
+  if (window.CONFIG_EXPOSICAO.nomeArquivoPdf) {
     btnDownloadZip.setAttribute(
       "download",
-      window.CONFIG_EXPOSICAO.nomeArquivoZip,
+      window.CONFIG_EXPOSICAO.nomeArquivoPdf,
     );
   }
 }

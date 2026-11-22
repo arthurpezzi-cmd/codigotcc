@@ -114,19 +114,28 @@ a-scene,
   background-color: transparent !important;
 }
 
+/* Exibição exclusiva em computador */
+.desktop-computer-warning,
+.desktop-only-phrase {
+  display: none;
+}
+
 /* ==========================================
    PÁGINA 1: HOME (index.html)
    ========================================== */
 .home-stack {
   width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
 }
 
 .zone {
+  width: 100%;
   padding: 40px 24px;
+}
+
+.zone-inner {
+  width: 100%;
 }
 
 .zone-yellow {
@@ -186,21 +195,6 @@ a-scene,
   text-wrap: pretty;
 }
 
-.btn-start-experience {
-  display: inline-block;
-  padding: 14px 22px;
-  background-color: var(--c-pink);
-  color: var(--c-black);
-  border: none;
-  text-decoration: none;
-  font-family: var(--font-body);
-  font-size: 0.98rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  cursor: pointer;
-}
-
 .zone-title-ochre {
   font-family: var(--font-display);
   font-size: clamp(3.8rem, 17vw, 5.2rem);
@@ -245,45 +239,54 @@ a-scene,
   text-wrap: pretty;
 }
 
+/* Todos os botões com o mesmo padding e fonte Queering Bold em caixa alta */
+.btn-start-experience,
+.btn-virtual-ochre,
+.btn-print-light,
+.mode-tab,
+.btn-back-arrow,
+.btn-modal-close {
+  padding: 15px 22px;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  text-decoration: none;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-start-experience {
+  display: inline-block;
+  width: fit-content;
+  background-color: var(--c-pink);
+  color: var(--c-black);
+}
+
+/* Botões da zona vermelha um acima do outro */
 .zone-buttons {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 12px;
   margin-top: 22px;
 }
 
 .btn-virtual-ochre {
-  width: 100%;
-  padding: 14px 18px;
+  display: inline-block;
+  width: fit-content;
   background-color: var(--c-ochre);
   color: #ffffff;
-  border: none;
-  text-decoration: none;
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  text-align: center;
-  display: block;
-  cursor: pointer;
 }
 
 .btn-print-light {
-  width: 100%;
-  padding: 14px 18px;
+  display: inline-block;
+  width: fit-content;
   background-color: var(--c-light);
   color: var(--c-ochre);
-  border: none;
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  text-decoration: none;
-  text-align: center;
-  display: block;
-  cursor: pointer;
 }
 
 .legal-copy {
@@ -340,17 +343,9 @@ a-scene,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 13px;
   background-color: #111111;
   color: #ffffff;
-  border: none;
   border-right: 1px solid rgba(255, 255, 255, 0.18);
-  text-decoration: none;
-  font-family: var(--font-body);
-  font-size: 1.15rem;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
 }
 
 .btn-back-arrow:active {
@@ -395,9 +390,6 @@ a-scene,
   transform: translateY(0);
 }
 
-/* Seletor elevado acima do card:
-   - Selecionado: fundo preto (#111111) + letra rosa (#ec1c7a)
-   - Não selecionado: fundo branco (#ffffff) + letra preta (#111111) */
 .mode-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -406,14 +398,7 @@ a-scene,
 }
 
 .mode-tab {
-  padding: 12px 10px;
-  border: none;
-  font-family: var(--font-body);
-  font-size: 0.84rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  cursor: pointer;
+  width: 100%;
   background-color: #ffffff;
   color: #111111;
   transition:
@@ -530,8 +515,8 @@ a-scene,
   bottom: -32px;
   left: 50%;
   transform: translateX(-50%);
-  font-family: var(--font-body);
-  font-size: 0.78rem;
+  font-family: var(--font-display);
+  font-size: 1rem;
   font-weight: 700;
   text-transform: uppercase;
   white-space: nowrap;
@@ -549,7 +534,7 @@ a-scene,
 }
 
 .virtual-inner {
-  max-width: 720px;
+  max-width: 960px;
   margin: 0 auto;
 }
 
@@ -579,16 +564,9 @@ a-scene,
 }
 
 .btn-modal-close {
-  padding: 10px 14px;
   background-color: #111111;
   color: #ffffff;
   border: 2px solid #ffffff;
-  text-decoration: none;
-  font-family: var(--font-body);
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  cursor: pointer;
 }
 
 .virtual-grid {
@@ -623,13 +601,15 @@ a-scene,
 }
 
 .mockup-name {
-  font-size: 0.88rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
   font-weight: 700;
   text-transform: uppercase;
+  line-height: 1.05;
 }
 
 /* ==========================================
-   MEDIA QUERIES PARA TELAS MAIORES (>= 768PX)
+   RESPONSIVIDADE PARA PC (>= 768PX)
    ========================================== */
 @media (min-width: 768px) {
   html,
@@ -637,35 +617,66 @@ a-scene,
     font-size: 17px;
   }
 
-  .home-stack {
-    max-width: 560px;
+  .mobile-hero-content {
+    display: none;
+  }
+
+  .desktop-computer-warning {
+    display: block;
+  }
+
+  .desktop-only-phrase {
+    display: block;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    margin-bottom: 0;
   }
 
   .zone {
-    padding: 48px 32px;
+    padding: 56px clamp(32px, 6vw, 96px);
+  }
+
+  .zone-inner {
+    width: 100%;
+    max-width: 1200px;
+  }
+
+  .zone-yellow {
+    padding-top: 56px;
+    padding-bottom: 52px;
+  }
+
+  .zone-black {
+    padding-top: 40px;
+    padding-bottom: 56px;
   }
 
   .hero-title,
   .zone-title-ochre,
   .zone-title-yellow {
-    font-size: 5.5rem;
+    font-size: clamp(3.6rem, 5.5vw, 5.4rem);
+    line-height: 0.92;
   }
 
   .hero-subtitle,
   .zone-subtitle-white {
-    font-size: 2.05rem;
+    font-size: clamp(1.55rem, 2.2vw, 2.2rem);
+    line-height: 1.04;
   }
 
   .hero-copy,
   .zone-copy-white {
-    font-size: 1.05rem;
+    font-size: 1.02rem;
   }
 
   .btn-start-experience,
   .btn-virtual-ochre,
-  .btn-print-light {
-    font-size: 1.05rem;
-    padding: 16px 22px;
+  .btn-print-light,
+  .mode-tab,
+  .btn-back-arrow,
+  .btn-modal-close {
+    padding: 15px 24px;
+    font-size: 1.25rem;
   }
 
   .bottom-panel {
@@ -686,6 +697,6 @@ a-scene,
 
   .virtual-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+    gap: 18px;
   }
 }

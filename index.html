@@ -20,19 +20,40 @@
   <body data-page="home">
     <section id="start-screen">
       <div class="home-stack">
+        <!-- Seção amarela no mobile; substituída pelo aviso no PC (>= 768px) -->
         <header class="zone zone-yellow">
-          <h1 class="hero-title">NÃO NASCEMOS PARA CABER:</h1>
-          <h2 class="hero-subtitle">
-            UMA EXPERIÊNCIA INTERATIVA DE ATIVISMO QUEER E LETRAMENTO
-            SOCIOPOLÍTICO!
-          </h2>
-          <p class="hero-copy">
-            Aponte seu celular para os cartazes e expanda seus conhecimentos
-            sobre o que está sendo representado.
-          </p>
-          <a id="btn-start" href="./scanner.html" class="btn-start-experience">
-            INICIAR EXPERIÊNCIA
-          </a>
+          <div class="zone-inner">
+            <div class="mobile-hero-content">
+              <h1 class="hero-title">NÃO NASCEMOS PARA CABER:</h1>
+              <h2 class="hero-subtitle">
+                UMA EXPERIÊNCIA INTERATIVA DE ATIVISMO QUEER E LETRAMENTO
+                SOCIOPOLÍTICO!
+              </h2>
+              <p class="hero-copy">
+                Aponte seu celular para os cartazes e expanda seus conhecimentos
+                sobre o que está sendo representado.
+              </p>
+              <a
+                id="btn-start"
+                href="./scanner.html"
+                class="btn-start-experience"
+              >
+                INICIAR EXPERIÊNCIA
+              </a>
+            </div>
+
+            <div class="desktop-computer-warning">
+              <h1 class="hero-title">
+                OPS... PARECE QUE VOCÊ ESTÁ EM UM COMPUTADOR
+              </h1>
+              <p class="hero-copy desktop-only-phrase">
+                A leitura interativa dos cartazes acontece pela câmera do
+                smartphone. Abra este endereço no seu celular para escanear as
+                obras, ou siga explorando os cartazes virtuais e o material para
+                impressão logo abaixo.
+              </p>
+            </div>
+          </div>
         </header>
 
         <section class="zone zone-red">
@@ -54,8 +75,8 @@
             <a
               id="btn-download-zip"
               class="btn-print-light"
-              href="./assets/downloads/cartazes-nao-nascemos-para-caber.zip"
-              download="cartazes-nao-nascemos-para-caber.zip"
+              href="./assets/downloads/para%20imprimir%20em%20casa.pdf"
+              download="para imprimir em casa.pdf"
             >
               BAIXAR CARTAZES PARA IMPRIMIR
             </a>
