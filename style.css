@@ -569,16 +569,17 @@ a-scene,
   border: 2px solid #ffffff;
 }
 
+/* Grade 3 linhas x 3 colunas */
 .virtual-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
 .mockup-card {
   background-color: #1a1a1d;
   border: 2px solid var(--c-light);
-  padding: 8px;
+  padding: 6px;
   text-align: left;
   color: var(--c-light);
   font-family: var(--font-body);
@@ -595,14 +596,15 @@ a-scene,
 }
 
 .mockup-group {
-  font-size: 0.72rem;
+  font-size: 0.62rem;
   font-weight: 700;
+  line-height: 1.2;
   margin-bottom: 2px;
 }
 
 .mockup-name {
   font-family: var(--font-display);
-  font-size: 1.05rem;
+  font-size: 0.85rem;
   font-weight: 700;
   text-transform: uppercase;
   line-height: 1.05;
@@ -698,5 +700,17 @@ a-scene,
   .virtual-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 18px;
+  }
+
+  .mockup-card {
+    padding: 8px;
+  }
+
+  .mockup-group {
+    font-size: 0.72rem;
+  }
+
+  .mockup-name {
+    font-size: 1.05rem;
   }
 }

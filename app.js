@@ -8,7 +8,6 @@ const A3_WIDTH = 1.0;
 const A3_HEIGHT = 1.4142;
 const PAGE_TYPE = document.body.dataset.page || "home";
 
-// Configura link de download do .zip na Home
 const btnDownloadZip = document.getElementById("btn-download-zip");
 if (window.CONFIG_EXPOSICAO && btnDownloadZip) {
   if (window.CONFIG_EXPOSICAO.urlPdfCartazes) {
@@ -58,7 +57,7 @@ if (PAGE_TYPE === "virtuais") {
       img.loading = "lazy";
       img.decoding = "async";
       img.alt = `${person.nomeCompleto} — Mockup ${idx + 1}`;
-      img.src = person.imagemMockup || "./assets/mockups/mockup-01.jpg";
+      img.src = person.imagemMockup || "./assets/mockups/mockup-01.webp";
 
       const groupSpan = document.createElement("div");
       groupSpan.className = "mockup-group";
@@ -98,6 +97,14 @@ if (PAGE_TYPE === "scanner") {
   const hudPersonBody = document.getElementById("hud-person-body");
 
   let demoPreviewContainer = null;
+  let virtualStageEl = null;
+  let virtualMockupImgEl = null;
+  let virtualPlanImgEl = null;
+  let virtualCutoutImgEl = null;
+  let virtualPrevArrowEl = null;
+  let virtualNextArrowEl = null;
+  let isVirtualMode = false;
+  let virtualHighlightEnabled = false;
   let currentPerson = null;
   let activeTargetIndex = null;
   let currentTab = "destaque";
@@ -115,6 +122,221 @@ if (PAGE_TYPE === "scanner") {
     A3_HEIGHT * 1.01,
   );
 
+  function navigateVirtualCartaz(direction) {
+    const list = [...(window.PERSONALIDADES_DB || [])].sort(
+      (a, b) => Number(a.targetIndex) - Number(b.targetIndex),
+    );
+    if (!list.length || !currentPerson) return;
+
+    const currPos = list.findIndex(
+      (p) => Number(p.targetIndex) === Number(currentPerson.targetIndex),
+    );
+    const basePos = currPos >= 0 ? currPos : 0;
+    const nextPos = (basePos + direction + list.length) % list.length;
+    const nextPerson = list[nextPos];
+    if (!nextPerson) return;
+
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("target", String(nextPerson.targetIndex));
+      window.history.replaceState({}, "", url.toString());
+    } catch (_) {}
+
+    window.simulateTarget(nextPerson.targetIndex);
+  }
+
+  function createDiscreetArrowButton(id, symbol, sideCss, direction) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.id = id;
+    btn.textContent = symbol;
+    btn.setAttribute(
+      "aria-label",
+      direction < 0 ? "Cartaz anterior" : "Próximo cartaz",
+    );
+    btn.style.cssText = [
+      "position:fixed",
+      "top:42%",
+      sideCss,
+      "transform:translateY(-50%)",
+      "z-index:11",
+      "width:34px",
+      "height:46px",
+      "display:inline-flex",
+      "align-items:center",
+      "justify-content:center",
+      "background:rgba(17,17,17,0.55)",
+      "color:rgba(255,255,255,0.78)",
+      "border:1px solid rgba(255,255,255,0.18)",
+      "font-family:var(--font-body)",
+      "font-size:1.35rem",
+      "font-weight:600",
+      "line-height:1",
+      "cursor:pointer",
+      "pointer-events:auto",
+    ].join(";");
+
+    btn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      navigateVirtualCartaz(direction);
+    });
+
+    return btn;
+  }
+
+  function ensureVirtualStage() {
+    if (virtualStageEl) return;
+
+    virtualStageEl = document.createElement("div");
+    virtualStageEl.id = "virtual-mockup-stage";
+    virtualStageEl.style.cssText = [
+      "position:fixed",
+      "inset:0",
+      "z-index:4",
+      "display:none",
+      "align-items:center",
+      "justify-content:center",
+      "padding:74px 18px 250px",
+      "background-color:#141416",
+      "pointer-events:none",
+    ].join(";");
+
+    const frame = document.createElement("div");
+    frame.style.cssText = [
+      "position:relative",
+      "height:100%",
+      "max-height:100%",
+      "max-width:100%",
+      "aspect-ratio:1/1.414",
+      "display:flex",
+      "align-items:center",
+      "justify-content:center",
+    ].join(";");
+
+    virtualMockupImgEl = document.createElement("img");
+    virtualMockupImgEl.style.cssText = [
+      "width:100%",
+      "height:100%",
+      "object-fit:contain",
+      "display:block",
+      "box-shadow:0 12px 30px rgba(0,0,0,0.65)",
+    ].join(";");
+
+    virtualPlanImgEl = document.createElement("img");
+    virtualPlanImgEl.style.cssText = [
+      "position:absolute",
+      "inset:0",
+      "width:100%",
+      "height:100%",
+      "object-fit:contain",
+      "display:none",
+      "box-shadow:0 12px 30px rgba(0,0,0,0.65)",
+    ].join(";");
+
+    virtualCutoutImgEl = document.createElement("img");
+    virtualCutoutImgEl.style.cssText = [
+      "position:absolute",
+      "inset:0",
+      "width:100%",
+      "height:100%",
+      "object-fit:contain",
+      "display:none",
+      "pointer-events:none",
+    ].join(";");
+
+    virtualPrevArrowEl = createDiscreetArrowButton(
+      "virtual-prev-arrow",
+      "‹",
+      "left:10px",
+      -1,
+    );
+    virtualNextArrowEl = createDiscreetArrowButton(
+      "virtual-next-arrow",
+      "›",
+      "right:10px",
+      1,
+    );
+
+    frame.append(virtualMockupImgEl, virtualPlanImgEl, virtualCutoutImgEl);
+    virtualStageEl.append(frame, virtualPrevArrowEl, virtualNextArrowEl);
+    document.body.insertBefore(virtualStageEl, document.body.firstChild);
+  }
+
+  function syncVirtualStage() {
+    if (!isVirtualMode || !currentPerson) {
+      if (virtualStageEl) virtualStageEl.style.display = "none";
+      if (virtualPrevArrowEl) virtualPrevArrowEl.style.display = "none";
+      if (virtualNextArrowEl) virtualNextArrowEl.style.display = "none";
+      return;
+    }
+
+    ensureVirtualStage();
+    virtualStageEl.style.display = "flex";
+    if (virtualPrevArrowEl) virtualPrevArrowEl.style.display = "inline-flex";
+    if (virtualNextArrowEl) virtualNextArrowEl.style.display = "inline-flex";
+
+    const isDestaque = currentTab === "destaque";
+    const cfg = currentPerson.destaquePopOut || {};
+
+    if (isDestaque) {
+      if (virtualPlanImgEl) virtualPlanImgEl.style.display = "none";
+
+      if (virtualMockupImgEl && currentPerson.imagemMockup) {
+        if (
+          virtualMockupImgEl.getAttribute("src") !== currentPerson.imagemMockup
+        ) {
+          virtualMockupImgEl.src = currentPerson.imagemMockup;
+        }
+        virtualMockupImgEl.alt = `${currentPerson.nomeCompleto} — Mockup`;
+        virtualMockupImgEl.style.display = "block";
+      }
+
+      const cutoutSrc =
+        cfg.arquivoVirtual ||
+        cfg.arquivoPNG ||
+        cfg.arquivoWebP ||
+        cfg.arquivoWEBP ||
+        "";
+
+      if (
+        virtualCutoutImgEl &&
+        virtualHighlightEnabled &&
+        cfg.ativo !== false &&
+        cutoutSrc
+      ) {
+        if (virtualCutoutImgEl.getAttribute("src") !== cutoutSrc) {
+          virtualCutoutImgEl.src = cutoutSrc;
+        }
+        const scale = Number(cfg.escalaExtra) || 1.04;
+        const posX = (Number(cfg.posX) || 0) * 100;
+        const posY = -(Number(cfg.posY) || 0.08) * 100 + 5;
+        virtualCutoutImgEl.alt = `${currentPerson.nomeCompleto} — Destaque`;
+        virtualCutoutImgEl.style.transform = `translate(${posX}%, ${posY}%) scale(${scale})`;
+        virtualCutoutImgEl.style.display = "block";
+      } else if (virtualCutoutImgEl) {
+        virtualCutoutImgEl.style.display = "none";
+      }
+    } else {
+      virtualHighlightEnabled = false;
+      if (virtualCutoutImgEl) virtualCutoutImgEl.style.display = "none";
+      if (virtualMockupImgEl) virtualMockupImgEl.style.display = "none";
+
+      const planSrc =
+        currentPerson.imagemMockupPlanejamento ||
+        currentPerson.arquivoPlanejamento ||
+        currentPerson.imagemMockup ||
+        "";
+
+      if (virtualPlanImgEl && planSrc) {
+        if (virtualPlanImgEl.getAttribute("src") !== planSrc) {
+          virtualPlanImgEl.src = planSrc;
+        }
+        virtualPlanImgEl.alt = `${currentPerson.nomeCompleto} — Planejamento`;
+        virtualPlanImgEl.style.display = "block";
+      }
+    }
+  }
+
   async function getBestRearCameraConstraints() {
     const baseVideoConstraints = {
       facingMode: { ideal: "environment" },
@@ -128,7 +350,6 @@ if (PAGE_TYPE === "scanner") {
     }
 
     try {
-      // Solicita acesso inicial rápido para liberar os labels das lentes no navegador
       const tempStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: "environment" } },
         audio: false,
@@ -150,7 +371,6 @@ if (PAGE_TYPE === "scanner") {
 
       const candidates = rearCameras.length > 0 ? rearCameras : videoInputs;
 
-      // Prioriza lente principal traseira, ignorando ultra-wide, macro, depth e telefoto
       const mainCamera =
         candidates.find((d) => {
           const label = (d.label || "").toLowerCase();
@@ -206,36 +426,72 @@ if (PAGE_TYPE === "scanner") {
   }
 
   function update3DModeVisibility() {
-    const showDestaque = currentTab === "destaque";
+    const showDestaque =
+      currentTab === "destaque" && (!isVirtualMode || virtualHighlightEnabled);
     targetLayersMap.forEach((layers) => {
       if (layers.destaqueLayer) {
         layers.destaqueLayer.setAttribute("visible", showDestaque);
       }
       if (layers.planejamentoLayer) {
-        layers.planejamentoLayer.setAttribute("visible", !showDestaque);
+        layers.planejamentoLayer.setAttribute(
+          "visible",
+          currentTab !== "destaque",
+        );
       }
     });
+    syncVirtualStage();
   }
 
   function renderTabContent() {
     if (!currentPerson) return;
-    hudPersonName.textContent = currentPerson.nomeCompleto;
-    hudPersonDates.textContent =
-      currentPerson.datas || currentPerson.anoNascimento || "";
-    hudPersonBody.textContent =
-      currentTab === "planejamento"
-        ? currentPerson.comoFoiPlanejado || currentPerson.resumoFeitos
-        : currentPerson.resumoFeitos;
+    if (hudPersonName) hudPersonName.textContent = currentPerson.nomeCompleto;
+    if (hudPersonDates) {
+      hudPersonDates.textContent =
+        currentPerson.datas || currentPerson.anoNascimento || "";
+    }
+    if (hudPersonBody) {
+      hudPersonBody.textContent =
+        currentTab === "planejamento"
+          ? currentPerson.comoFoiPlanejado || currentPerson.resumoFeitos
+          : currentPerson.resumoFeitos;
+    }
     update3DModeVisibility();
   }
 
   function setActiveTab(tabName) {
-    currentTab = tabName;
-    const isDestaque = tabName === "destaque";
+    if (isVirtualMode) {
+      if (tabName === "destaque") {
+        if (currentTab === "destaque") {
+          virtualHighlightEnabled = !virtualHighlightEnabled;
+        } else {
+          currentTab = "destaque";
+          virtualHighlightEnabled = true;
+        }
+      } else if (tabName === "planejamento") {
+        if (currentTab === "planejamento") {
+          currentTab = "destaque";
+          virtualHighlightEnabled = false;
+        } else {
+          currentTab = "planejamento";
+          virtualHighlightEnabled = false;
+          if (virtualCutoutImgEl) {
+            virtualCutoutImgEl.style.display = "none";
+          }
+        }
+      }
+    } else {
+      currentTab = tabName;
+      virtualHighlightEnabled = true;
+    }
+
+    const isDestaque = currentTab === "destaque";
+    const destaqueVisualActive = isVirtualMode
+      ? isDestaque && virtualHighlightEnabled
+      : isDestaque;
 
     if (tabDestaque) {
-      tabDestaque.classList.toggle("is-active", isDestaque);
-      tabDestaque.setAttribute("aria-selected", String(isDestaque));
+      tabDestaque.classList.toggle("is-active", destaqueVisualActive);
+      tabDestaque.setAttribute("aria-selected", String(destaqueVisualActive));
     }
     if (tabPlanejamento) {
       tabPlanejamento.classList.toggle("is-active", !isDestaque);
@@ -269,19 +525,43 @@ if (PAGE_TYPE === "scanner") {
       palette.tabSelectedText || "#ec1c7a",
     );
 
-    groupBannerText.textContent = palette.nomeGrupo;
+    if (groupBannerText) {
+      groupBannerText.textContent = palette.nomeGrupo;
+    }
 
     if (!isSamePerson) {
-      setActiveTab("destaque");
+      currentTab = "destaque";
+      if (isVirtualMode) {
+        virtualHighlightEnabled = false;
+        if (tabDestaque) {
+          tabDestaque.classList.remove("is-active");
+          tabDestaque.setAttribute("aria-selected", "false");
+        }
+        if (tabPlanejamento) {
+          tabPlanejamento.classList.remove("is-active");
+          tabPlanejamento.setAttribute("aria-selected", "false");
+        }
+        renderTabContent();
+      } else {
+        setActiveTab("destaque");
+      }
     } else {
       renderTabContent();
     }
 
-    reticle.classList.add("locked");
-    personalityHud.classList.add("visible");
+    if (reticle) {
+      reticle.classList.add("locked");
+      reticle.style.display = "none";
+    }
+    if (personalityHud) {
+      personalityHud.classList.add("visible");
+      personalityHud.style.opacity = "1";
+      personalityHud.style.transform = "translateY(0)";
+    }
   }
 
   function resetScannerTheme(lostTargetIdx = null) {
+    if (isVirtualMode) return;
     if (
       lostTargetIdx !== null &&
       activeTargetIndex !== null &&
@@ -317,9 +597,18 @@ if (PAGE_TYPE === "scanner") {
 
       currentPerson = null;
       activeTargetIndex = null;
-      groupBannerText.textContent = "APONTE PARA O CARTAZ";
-      reticle.classList.remove("locked");
-      personalityHud.classList.remove("visible");
+      if (groupBannerText) {
+        groupBannerText.textContent = "APONTE PARA O CARTAZ";
+      }
+      if (reticle) {
+        reticle.classList.remove("locked");
+        reticle.style.display = "";
+      }
+      if (personalityHud) {
+        personalityHud.classList.remove("visible");
+        personalityHud.style.opacity = "";
+        personalityHud.style.transform = "";
+      }
     }, 220);
   }
 
@@ -332,14 +621,17 @@ if (PAGE_TYPE === "scanner") {
     );
   }
 
-  sceneEl.addEventListener("renderstart", () => {
-    if (sceneEl.renderer) {
-      sceneEl.renderer.setClearColor(0x000000, 0);
-      sceneEl.renderer.setClearAlpha(0);
-    }
-  });
+  if (sceneEl) {
+    sceneEl.addEventListener("renderstart", () => {
+      if (sceneEl.renderer) {
+        sceneEl.renderer.setClearColor(0x000000, 0);
+        sceneEl.renderer.setClearAlpha(0);
+      }
+    });
+  }
 
-  function buildCharacterPopOutLayer(person) {
+  function buildCharacterPopOutLayer(person, options = {}) {
+    const isVirtual = Boolean(options.isVirtual);
     const palette = getPaletteForPerson(person);
     const container = document.createElement("a-entity");
     const cfg = person.destaquePopOut || {
@@ -353,8 +645,13 @@ if (PAGE_TYPE === "scanner") {
     if (!cfg.ativo) return container;
 
     const zDepth = cfg.profundidadeZ || 0.08;
-    const cutoutUrl =
-      cfg.arquivoWebP || cfg.arquivoWEBP || cfg.arquivoPNG || "";
+    const cutoutUrl = isVirtual
+      ? cfg.arquivoVirtual ||
+        cfg.arquivoPNG ||
+        cfg.arquivoWebP ||
+        cfg.arquivoWEBP ||
+        ""
+      : cfg.arquivoPNG || cfg.arquivoWebP || cfg.arquivoWEBP || "";
 
     container.setAttribute(
       "animation__float",
@@ -419,7 +716,8 @@ if (PAGE_TYPE === "scanner") {
     return container;
   }
 
-  function buildPlanningDigitalLayer(person) {
+  function buildPlanningDigitalLayer(person, options = {}) {
+    const isVirtual = Boolean(options.isVirtual);
     const palette = getPaletteForPerson(person);
     const container = document.createElement("a-entity");
     container.setAttribute("visible", "false");
@@ -428,7 +726,9 @@ if (PAGE_TYPE === "scanner") {
     container.appendChild(holder);
 
     holder.addEventListener("loaded", () => {
-      const planningSrc = person.arquivoPlanejamento || "";
+      const planningSrc = isVirtual
+        ? person.imagemMockupPlanejamento || person.arquivoPlanejamento || ""
+        : person.arquivoPlanejamento || "";
 
       loadTextureCached(
         planningSrc,
@@ -478,16 +778,47 @@ if (PAGE_TYPE === "scanner") {
     return container;
   }
 
-  function createPerson3DContent(person, mapKey) {
+  function createPerson3DContent(person, mapKey, options = {}) {
     const wrapper = document.createElement("a-entity");
 
-    const destaqueLayer = buildCharacterPopOutLayer(person);
-    const planejamentoLayer = buildPlanningDigitalLayer(person);
+    const destaqueLayer = buildCharacterPopOutLayer(person, options);
+    const planejamentoLayer = buildPlanningDigitalLayer(person, options);
 
     wrapper.append(destaqueLayer, planejamentoLayer);
     targetLayersMap.set(mapKey, { destaqueLayer, planejamentoLayer });
     return wrapper;
   }
+
+  function clearDemoPreview() {
+    targetLayersMap.delete("demo-preview");
+    if (demoPreviewContainer && demoPreviewContainer.parentNode) {
+      demoPreviewContainer.parentNode.removeChild(demoPreviewContainer);
+      demoPreviewContainer = null;
+    }
+  }
+
+  window.simulateTarget = function (index) {
+    const person = (window.PERSONALIDADES_DB || []).find(
+      (p) => Number(p.targetIndex) === Number(index),
+    );
+    if (!person) return;
+
+    isVirtualMode = true;
+    virtualHighlightEnabled = false;
+    clearDemoPreview();
+
+    if (sceneEl) {
+      demoPreviewContainer = document.createElement("a-entity");
+      demoPreviewContainer.setAttribute("position", "0 0.05 -1.65");
+      demoPreviewContainer.appendChild(
+        createPerson3DContent(person, "demo-preview", { isVirtual: true }),
+      );
+      sceneEl.appendChild(demoPreviewContainer);
+    }
+
+    applyGroupTheme(person, index);
+    syncVirtualStage();
+  };
 
   function initARTargets() {
     const fragment = document.createDocumentFragment();
@@ -500,11 +831,14 @@ if (PAGE_TYPE === "scanner") {
       );
 
       targetEl.appendChild(
-        createPerson3DContent(person, `target-${person.targetIndex}`),
+        createPerson3DContent(person, `target-${person.targetIndex}`, {
+          isVirtual: false,
+        }),
       );
       targetElementsMap.set(person.targetIndex, targetEl);
 
       targetEl.addEventListener("targetFound", () => {
+        if (isVirtualMode) return;
         clearDemoPreview();
         applyGroupTheme(person, person.targetIndex);
       });
@@ -515,11 +849,12 @@ if (PAGE_TYPE === "scanner") {
       fragment.appendChild(targetEl);
     });
 
-    sceneEl.appendChild(fragment);
+    if (sceneEl) {
+      sceneEl.appendChild(fragment);
+    }
 
-    // Sincronização contínua caso o evento targetFound oscile ou dispare na inicialização
     setInterval(() => {
-      if (demoPreviewContainer) return;
+      if (isVirtualMode || demoPreviewContainer) return;
 
       let visiblePerson = null;
       let visibleIdx = null;
@@ -546,12 +881,12 @@ if (PAGE_TYPE === "scanner") {
       }
     }, 300);
 
-    // Se veio da tela de cartazes virtuais com ?target=X, ativa o cartaz selecionado
     const params = new URLSearchParams(window.location.search);
     const targetParam = params.get("target");
-    if (targetParam !== null) {
+    if (targetParam !== null && targetParam !== "") {
       const parsedIndex = Number(targetParam);
       if (!Number.isNaN(parsedIndex)) {
+        isVirtualMode = true;
         window.simulateTarget(parsedIndex);
       }
     }
@@ -560,6 +895,7 @@ if (PAGE_TYPE === "scanner") {
   initARTargets();
 
   async function startMindARWithBestCamera() {
+    if (isVirtualMode || !sceneEl) return;
     const sys = sceneEl.systems && sceneEl.systems["mindar-image-system"];
     if (!sys) return;
 
@@ -581,15 +917,18 @@ if (PAGE_TYPE === "scanner") {
     }
   }
 
-  if (sceneEl.hasLoaded) {
-    startMindARWithBestCamera();
-  } else {
-    sceneEl.addEventListener("loaded", startMindARWithBestCamera, {
-      once: true,
-    });
+  if (sceneEl) {
+    if (sceneEl.hasLoaded) {
+      startMindARWithBestCamera();
+    } else {
+      sceneEl.addEventListener("loaded", startMindARWithBestCamera, {
+        once: true,
+      });
+    }
   }
 
   async function ensureCameraFeedVisible() {
+    if (isVirtualMode) return;
     const existingVideo = document.querySelector("body > video");
     if (existingVideo && existingVideo.srcObject) return;
 
@@ -615,32 +954,9 @@ if (PAGE_TYPE === "scanner") {
     }
   }
 
-  sceneEl.addEventListener("arError", async () => {
-    await ensureCameraFeedVisible();
-  });
-
-  function clearDemoPreview() {
-    targetLayersMap.delete("demo-preview");
-    if (demoPreviewContainer && demoPreviewContainer.parentNode) {
-      demoPreviewContainer.parentNode.removeChild(demoPreviewContainer);
-      demoPreviewContainer = null;
-    }
+  if (sceneEl) {
+    sceneEl.addEventListener("arError", async () => {
+      await ensureCameraFeedVisible();
+    });
   }
-
-  window.simulateTarget = function (index) {
-    const person = (window.PERSONALIDADES_DB || []).find(
-      (p) => p.targetIndex === index,
-    );
-    if (!person) return;
-
-    clearDemoPreview();
-    demoPreviewContainer = document.createElement("a-entity");
-    demoPreviewContainer.setAttribute("position", "0 0.05 -1.65");
-    demoPreviewContainer.appendChild(
-      createPerson3DContent(person, "demo-preview"),
-    );
-    sceneEl.appendChild(demoPreviewContainer);
-
-    applyGroupTheme(person, index);
-  };
 }
